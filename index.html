@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المحفظة السعودية Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading-overlay">
+    <div class="spinner-border text-success mb-2"></div>
+    <span class="fw-bold">جاري تحديث البيانات...</span>
+</div>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5 class="text-success fw-bold m-0">
+            <i class="fas fa-chart-line"></i>
+            <span> تداول الذكي Pro</span>
+        </h5>
+    </div>
+    
+    <div class="mt-2 border-bottom border-secondary pb-2">
+        <button class="refresh-link" onclick="fetchDataFromServer()">
+            <i class="fas fa-sync-alt"></i> <span>تحديث فوري</span>
+        </button>
+    </div>
+
+    <div class="mt-2">
+        <div class="nav-link active" onclick="navigateTo('dashboard', this)">
+            <i class="fas fa-home"></i> <span>لوحة التحكم</span>
+        </div>
+        <div class="nav-link" onclick="navigateTo('stocks', this)">
+            <i class="fas fa-list"></i> <span>الشركات</span>
+        </div>
+        <div class="nav-link" onclick="navigateTo('trades', this)">
+            <i class="fas fa-exchange-alt"></i> <span>الصفقات</span>
+        </div>
+        <div class="nav-link" onclick="navigateTo('dividends', this)">
+            <i class="fas fa-coins"></i> <span>التوزيعات</span>
+        </div>
+        <div class="nav-link" onclick="navigateTo('bonus', this)">
+            <i class="fas fa-gift"></i> <span>أسهم المنحة</span>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    
+    <div id="section-dashboard" class="content-section">
+        <div class="card p-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle m-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>الشركة / القطاع</th>
+                            <th>الكمية الحالية</th>
+                            <th>التكلفة الصافية</th>
+                            <th>التوزيعات</th>
+                            <th>عائد التوزيعات %</th>
+                            <th>الربح/الخسارة</th>
+                        </tr>
+                        <tr class="total-header-row">
+                            <td>الإجمالي العام</td>
+                            <td id="total-qty-row">-</td>
+                            <td id="total-cost-row">-</td>
+                            <td id="total-div-row">-</td>
+                            <td id="total-yield-row">-</td>
+                            <td id="total-pl-row">-</td>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-table"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="section-stocks" class="content-section">
+        <div class="card p-4">
+            <h4 class="fw-bold mb-3">إضافة شركة جديدة</h4>
+            <form id="stockForm" class="row g-3">
+                <div class="col-md-3"><input type="text" id="st-symbol" class="form-control" placeholder="رمز الشركة (مثال: 1120)" required></div>
+                <div class="col-md-4"><input type="text" id="st-name" class="form-control" placeholder="اسم الشركة" required></div>
+                <div class="col-md-3"><input type="text" id="st-sector" class="form-control" placeholder="القطاع" required></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-success w-100">حفظ الشركة</button></div>
+            </form>
+        </div>
+        <div class="card p-3">
+            <table class="table">
+                <thead><tr><th>الرمز</th><th>اسم الشركة</th><th>القطاع</th></tr></thead>
+                <tbody id="stocks-list-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-trades" class="content-section">
+        <div class="card p-4">
+            <h4 class="fw-bold mb-3">تسجيل عملية تداول</h4>
+            <form id="tradeForm" class="row g-3">
+                <div class="col-md-2"><label class="form-label small">التاريخ</label><input type="date" id="tr-date" class="form-control" required></div>
+                <div class="col-md-2"><label class="form-label small">النوع</label><select id="tr-type" class="form-select"><option value="شراء">شراء</option><option value="بيع">بيع</option></select></div>
+                <div class="col-md-3"><label class="form-label small">الشركة</label><select id="tr-symbol" class="form-select stock-dd" required></select></div>
+                <div class="col-md-2"><label class="form-label small">الكمية</label><input type="number" id="tr-qty" class="form-control" required></div>
+                <div class="col-md-2"><label class="form-label small">السعر</label><input type="number" step="0.01" id="tr-price" class="form-control" required></div>
+                <div class="col-md-1 d-flex align-items-end"><button type="submit" class="btn btn-primary w-100"><i class="fas fa-save"></i></button></div>
+            </form>
+        </div>
+        <div class="card p-3">
+            <table class="table">
+                <thead><tr><th>التاريخ</th><th>النوع</th><th>الرمز</th><th>الشركة</th><th>الكمية</th><th>السعر</th></tr></thead>
+                <tbody id="trades-list-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-dividends" class="content-section">
+        <div class="card p-4 border-start border-4 border-primary">
+            <h4 class="fw-bold mb-3 text-primary">تسجيل أرباح نقدية</h4>
+            <form id="dividendForm" class="row g-3">
+                <div class="col-md-3"><label class="form-label small text-primary">تاريخ الاستلام</label><input type="date" id="div-date" class="form-control" required></div>
+                <div class="col-md-4"><label class="form-label small text-primary">الشركة</label><select id="div-symbol" class="form-select stock-dd" required></select></div>
+                <div class="col-md-3"><label class="form-label small text-primary">المبلغ المستلم</label><input type="number" step="0.01" id="div-amount" class="form-control" required></div>
+                <div class="col-md-2 d-flex align-items-end"><button type="submit" class="btn btn-primary w-100">حفظ التوزيع</button></div>
+            </form>
+        </div>
+        <div class="card p-3">
+            <table class="table">
+                <thead><tr><th>التاريخ</th><th>الرمز</th><th>الشركة</th><th>المبلغ</th></tr></thead>
+                <tbody id="dividends-list-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="section-bonus" class="content-section">
+        <div class="card p-4 border-start border-4 border-warning">
+            <h4 class="fw-bold mb-3 text-warning">إضافة أسهم منحة</h4>
+            <form id="bonusForm" class="row g-3">
+                <div class="col-md-3"><label class="form-label small text-warning">تاريخ المنحة</label><input type="date" id="bn-date" class="form-control" required></div>
+                <div class="col-md-4"><label class="form-label small text-warning">الشركة</label><select id="bn-symbol" class="form-select stock-dd" required></select></div>
+                <div class="col-md-3"><label class="form-label small text-warning">الكمية الممنوحة</label><input type="number" id="bn-qty" class="form-control" required></div>
+                <div class="col-md-2 d-flex align-items-end"><button type="submit" class="btn btn-bonus w-100">حفظ المنحة</button></div>
+            </form>
+        </div>
+        <div class="card p-3">
+            <table class="table">
+                <thead><tr><th>التاريخ</th><th>الرمز</th><th>الشركة</th><th>الكمية</th></tr></thead>
+                <tbody id="bonus-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
