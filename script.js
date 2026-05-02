@@ -83,10 +83,14 @@ function renderDashboard() {
         totalCost += m.totalBuyCost;
         totalNetCost += m.netCost;
 
+        // حساب سعر التكلفة (التكلفة الصافية / الكمية الحالية)
+        let costPrice = m.currentQty > 0 ? (m.netCost / m.currentQty) : 0;
+
         body.innerHTML += `<tr>
             <td><span class="fw-bold">${s[1]}</span><br><small class="badge bg-secondary" style="font-size:10px">${s[2] || 'غير محدد'}</small></td>
             <td><span class="badge bg-light text-dark border">${m.currentQty.toLocaleString()}</span></td>
             <td>${m.netCost.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+            <td>${costPrice.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
             <td class="text-primary fw-bold">${m.divAmt.toLocaleString()}</td>
             <td>${m.yieldPct.toFixed(2)}%</td>
             <td class="${m.pl >= 0 ? 'val-pos' : 'val-neg'}">${m.pl.toLocaleString()}</td>
